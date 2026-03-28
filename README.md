@@ -148,41 +148,60 @@ cp config/pki.example.toml    config/pki.toml
 
 ### Run in Foreground
 
-```bash
+```powershell
 # Substation agent
 osc-agent.exe --config config/agent.toml run
 
 # ONS server
-osc-server.exe --config config/server.toml
+osc-server.exe --config config/server.toml run
 
 # PKI server
 osc-pki-server.exe --config config/pki.toml
 ```
 
-### Windows Service Management
+### Deploy as Windows Service (recommended)
 
-```bash
-# Install
-osc-agent.exe --config config/agent.toml install-service
-
-# Uninstall
-osc-agent.exe --config config/agent.toml uninstall-service
-
-# Check queue status
-osc-agent.exe --config config/agent.toml status
-```
-
-### PowerShell Deployment Scripts
+Use the PowerShell scripts to install and register the service. They copy the binary, create the directory structure, and register the service with the correct `run-service` argument for the Windows SCM:
 
 ```powershell
-# Deploy and register the agent service on a substation
-.\scripts\install-agent.ps1
+# On the substation host
+.\scripts\install-agent.ps1 -BinPath .\osc-agent.exe
+Start-Service OscAgent
+Get-Service  OscAgent
 
+# On the ONS server host
+.\scripts\install-server.ps1 -BinPath .\osc-server.exe
+Start-Service OscServer
+Get-Service  OscServer
+```
+
+> **Note:** The `run-service` subcommand is used internally by the Windows Service Control Manager (SCM).
+> Do not invoke it directly — use `run` for foreground testing.
+
+### Agent Service — Additional Commands
+
+```powershell
+Stop-Service   OscAgent
+Restart-Service OscAgent
+
+# Check upload queue depth
+osc-agent.exe --config D:\OscAgent\config\agent.toml status
+
+# Uninstall the service
+osc-agent.exe --config D:\OscAgent\config\agent.toml uninstall-service
+```
+
+### PowerShell Certificate Management Scripts
+
+```powershell
 # Issue a new client certificate for a station
 .\scripts\new-station-cert.ps1 -StationId SE_XANXERE
 
 # Check certificate expiry across all stations
 .\scripts\check-expiry.ps1
+
+# Renew a specific station certificate manually
+.\scripts\renew-cert.ps1 -StationId SE_XANXERE
 ```
 
 ## Directory Layout (Agent Host)

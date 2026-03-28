@@ -1381,6 +1381,7 @@ dependencies = [
  "tracing-appender",
  "tracing-subscriber",
  "uuid",
+ "windows-service",
  "x509-parser",
 ]
 

@@ -1,11 +1,12 @@
 mod api;
 mod audit;
 mod config;
+mod service;
 mod storage;
 mod tls;
 
 use anyhow::{Context, Result};
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use std::{net::SocketAddr, path::PathBuf, sync::Arc};
 use tracing::info;
 use tracing_appender::rolling;
@@ -16,6 +17,18 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 struct Cli {
     #[arg(short, long, default_value = "config/server.toml")]
     config: PathBuf,
+
+    #[command(subcommand)]
+    command: Option<Commands>,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Executa como processo normal (foreground)
+    Run,
+    /// Executa sob controle do Windows Service Control Manager (chamado pelo SCM)
+    #[cfg(windows)]
+    RunService,
 }
 
 #[tokio::main]
@@ -37,6 +50,19 @@ async fn main() -> Result<()> {
         .with(tracing_subscriber::fmt::layer().with_writer(std::io::stderr))
         .init();
 
+    match cli.command.unwrap_or(Commands::Run) {
+        Commands::Run => run_server(cfg).await?,
+
+        #[cfg(windows)]
+        Commands::RunService => {
+            service::windows_service::run_as_service(cfg)?;
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn run_server(cfg: config::ServerConfig) -> Result<()> {
     info!(listen_addr = %cfg.listen_addr, "osc-server iniciando");
 
     let audit = Arc::new(audit::AuditLogger::new(cfg.audit_dir.clone()));

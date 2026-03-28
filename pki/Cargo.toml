@@ -30,3 +30,6 @@ clap = { version = "4", features = ["derive"] }
 bytes = "1"
 pem = "3"
 time = "0.3"
+
+[target.'cfg(windows)'.dependencies]
+windows-service = "0.7"

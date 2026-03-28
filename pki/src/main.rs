@@ -2,9 +2,11 @@ mod api;
 mod audit;
 mod ca;
 mod config;
+mod init;
+mod service;
 
 use anyhow::{Context, Result};
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use std::{net::SocketAddr, path::PathBuf, sync::Arc};
 use tracing::info;
 use tracing_appender::rolling;
@@ -18,11 +20,30 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 struct Cli {
     #[arg(short, long, default_value = "config/pki.toml")]
     config: PathBuf,
+
+    #[command(subcommand)]
+    command: Option<Commands>,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Executa o servidor PKI em foreground
+    Run,
+    /// Executa sob controle do Windows Service Control Manager (chamado pelo SCM)
+    #[cfg(windows)]
+    RunService,
+    /// Gera toda a hierarquia PKI (Root CA, Intermediate CA, certs de servidor)
+    InitPki(init::InitPkiArgs),
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
+
+    // InitPki não precisa de config nem de logging rotativo
+    if let Some(Commands::InitPki(args)) = cli.command {
+        return init::run_init_pki(args);
+    }
 
     let cfg = config::PkiConfig::load(&cli.config)
         .with_context(|| format!("Carregando config PKI: {}", cli.config.display()))?;
@@ -43,9 +64,24 @@ async fn main() -> Result<()> {
         .with(tracing_subscriber::fmt::layer().with_writer(std::io::stderr))
         .init();
 
+    match cli.command.unwrap_or(Commands::Run) {
+        Commands::Run => run_server(cfg).await?,
+
+        #[cfg(windows)]
+        Commands::RunService => {
+            service::windows_service::run_as_service(cfg)?;
+        }
+
+        // InitPki já tratado acima
+        Commands::InitPki(_) => unreachable!(),
+    }
+
+    Ok(())
+}
+
+pub async fn run_server(cfg: config::PkiConfig) -> Result<()> {
     info!(listen_addr = %cfg.listen_addr, "osc-pki-server iniciando");
 
-    // Carregar CA cert e key em memória (permanecem pelo ciclo de vida do processo)
     let ca_cert_pem = std::fs::read_to_string(&cfg.ca_cert_pem)
         .with_context(|| format!("Lendo CA cert: {}", cfg.ca_cert_pem.display()))?;
     let ca_key_pem = std::fs::read_to_string(&cfg.ca_key_pem)

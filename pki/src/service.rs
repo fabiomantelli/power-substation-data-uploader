@@ -1,10 +1,9 @@
-/// Windows Service integration for osc-agent
-/// On non-Windows platforms, just runs the main loop directly.
+/// Windows Service integration for osc-pki-server
 
 #[cfg(windows)]
 pub mod windows_service {
-    use crate::config::AgentConfig;
-    use crate::run_agent;
+    use crate::config::PkiConfig;
+    use crate::run_server;
     use std::ffi::OsString;
     use std::sync::{Arc, Mutex};
     use windows_service::{
@@ -17,14 +16,13 @@ pub mod windows_service {
         service_dispatcher,
     };
 
-    const SERVICE_NAME: &str = "OscAgent";
+    const SERVICE_NAME: &str = "OscPkiServer";
 
-    // Config compartilhada entre o dispatcher e o service_main
-    static GLOBAL_CONFIG: Mutex<Option<AgentConfig>> = Mutex::new(None);
+    static GLOBAL_CONFIG: Mutex<Option<PkiConfig>> = Mutex::new(None);
 
     define_windows_service!(ffi_service_main, service_main);
 
-    pub fn run_as_service(cfg: AgentConfig) -> anyhow::Result<()> {
+    pub fn run_as_service(cfg: PkiConfig) -> anyhow::Result<()> {
         {
             let mut guard = GLOBAL_CONFIG.lock().unwrap();
             *guard = Some(cfg);
@@ -74,13 +72,12 @@ pub mod windows_service {
             })
             .map_err(|e| anyhow::anyhow!("Setando status Running: {}", e))?;
 
-        // Executar o agente num runtime tokio dedicado
         let runtime = tokio::runtime::Runtime::new()?;
         runtime.block_on(async move {
             tokio::select! {
-                result = run_agent(cfg) => {
+                result = run_server(cfg) => {
                     if let Err(e) = result {
-                        tracing::error!("run_agent encerrou com erro: {:#}", e);
+                        tracing::error!("run_server PKI encerrou com erro: {:#}", e);
                     }
                 }
                 _ = tokio::task::spawn_blocking(move || {

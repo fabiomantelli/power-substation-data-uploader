@@ -77,7 +77,7 @@ if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue) {
 }
 
 # Criar servico
-$binWithArgs = "`"$DestBin`" --config `"$WorkDir\config\agent.toml`" run"
+$binWithArgs = "`"$DestBin`" --config `"$WorkDir\config\agent.toml`" run-service"
 New-Service `
     -Name $ServiceName `
     -DisplayName $DisplayName `

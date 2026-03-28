@@ -98,7 +98,7 @@ if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue) {
 }
 
 # Criar servico
-$binWithArgs = "`"$DestBin`" --config `"$WorkDir\config\pki.toml`""
+$binWithArgs = "`"$DestBin`" --config `"$WorkDir\config\pki.toml`" run-service"
 New-Service `
     -Name $ServiceName `
     -DisplayName $DisplayName `

@@ -28,6 +28,9 @@ struct Cli {
 enum Commands {
     /// Executa como processo normal (foreground)
     Run,
+    /// Executa sob controle do Windows Service Control Manager (chamado pelo SCM)
+    #[cfg(windows)]
+    RunService,
     /// Instala como Windows Service
     #[cfg(windows)]
     InstallService,
@@ -67,6 +70,11 @@ async fn main() -> Result<()> {
         Commands::Run => run_agent(cfg).await?,
 
         #[cfg(windows)]
+        Commands::RunService => {
+            service::windows_service::run_as_service(cfg)?;
+        }
+
+        #[cfg(windows)]
         Commands::InstallService => {
             install_service()?;
         }
@@ -86,7 +94,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn run_agent(cfg: config::AgentConfig) -> Result<()> {
+pub async fn run_agent(cfg: config::AgentConfig) -> Result<()> {
     let cfg = Arc::new(cfg);
     let queue = Arc::new(queue::LocalQueue::new(cfg.queue_dir.clone()));
 
@@ -131,7 +139,7 @@ fn install_service() -> Result<()> {
         start_type: ServiceStartType::AutoStart,
         error_control: ServiceErrorControl::Normal,
         executable_path: exe_path,
-        launch_arguments: vec![OsString::from("run")],
+        launch_arguments: vec![OsString::from("run-service")],
         dependencies: vec![],
         account_name: None,
         account_password: None,

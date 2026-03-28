@@ -49,7 +49,7 @@ if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue) {
     Start-Sleep -Seconds 2
 }
 
-$binWithArgs = "`"$DestBin`" --config `"$WorkDir\config\server.toml`""
+$binWithArgs = "`"$DestBin`" --config `"$WorkDir\config\server.toml`" run-service"
 New-Service `
     -Name $ServiceName `
     -DisplayName $DisplayName `
