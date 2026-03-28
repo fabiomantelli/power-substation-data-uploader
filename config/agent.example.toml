@@ -1,0 +1,39 @@
+station_id = "SE_XANXERE"
+device_id = "F60_01"
+inbox_dir = "D:\\OscAgent\\inbox"
+queue_dir = "D:\\OscAgent\\queue"
+sent_dir = "D:\\OscAgent\\sent"
+error_dir = "D:\\OscAgent\\error"
+spool_dir = "D:\\OscAgent\\spool"
+log_dir = "D:\\OscAgent\\logs"
+state_dir = "D:\\OscAgent\\state"
+server_url = "https://upload.ons.intra:8443"
+client_cert_pem = "D:\\OscAgent\\certs\\client.pem"
+client_key_pem = "D:\\OscAgent\\certs\\client-key.pem"
+ca_bundle_pem = "D:\\OscAgent\\certs\\ca-chain.pem"
+max_retries = 10
+retry_initial_backoff_seconds = 30
+retry_max_backoff_seconds = 3600
+upload_timeout_seconds = 120
+watch_debounce_ms = 2000
+
+[retention]
+sent_retention_days = 30
+sent_retention_max_days = 90
+error_retention_days = 60
+log_retention_days = 30
+cleanup_interval_minutes = 60
+
+[disk]
+drive = "D:"
+warn_threshold_pct = 70
+reduce_retention_threshold_pct = 80
+force_cleanup_threshold_pct = 90
+min_free_mb = 5120
+
+[renewal]
+pki_server_url = "https://pki.ons.intra:8444"
+renewal_days_before_expiry = 30
+check_interval_hours = 6
+new_key_path = "D:\\OscAgent\\certs\\client-key-new.pem"
+new_cert_path = "D:\\OscAgent\\certs\\client-new.pem"

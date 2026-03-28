@@ -1,0 +1,27 @@
+# Rust build output
+/target/
+**/*.rs.bk
+
+# Sensitive files — never commit certificates, keys, or real configs
+*.pem
+*.key
+*.p12
+*.pfx
+config/agent.toml
+config/server.toml
+config/pki.toml
+
+# Environment / secrets
+.env
+.env.*
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log

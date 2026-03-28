@@ -1,0 +1,8 @@
+# All files — default owner
+# Replace @your-github-username with your actual GitHub handle
+* @your-github-username
+
+# PKI is security-sensitive — require explicit review
+/pki/ @your-github-username
+/scripts/ @your-github-username
+/config/ @your-github-username

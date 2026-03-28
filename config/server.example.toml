@@ -1,0 +1,20 @@
+listen_addr = "0.0.0.0:8443"
+server_cert_pem = "D:\\OscServer\\certs\\server.pem"
+server_key_pem = "D:\\OscServer\\certs\\server-key.pem"
+ca_bundle_pem = "D:\\OscServer\\certs\\ca-chain.pem"
+staging_dir = "D:\\OscServer\\staging"
+repository_dir = "D:\\OscServer\\repository"
+quarantine_dir = "D:\\OscServer\\quarantine"
+audit_dir = "D:\\OscServer\\audit"
+log_dir = "D:\\OscServer\\logs"
+max_upload_size_mb = 200
+upload_timeout_seconds = 300
+allowed_station_ids = [
+    "SE_XANXERE",
+    "SE_PALHOCA",
+    "SE_JOINVILLE",
+]
+
+[rate_limit]
+max_uploads_per_minute = 10
+burst_size = 5

@@ -1,0 +1,7 @@
+[workspace]
+members = ["substation", "ons", "pki"]
+resolver = "2"
+
+[workspace.dependencies]
+rcgen = { version = "0.13", features = ["pem", "x509-parser"] }
+x509-parser = "0.16"

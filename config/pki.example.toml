@@ -1,0 +1,11 @@
+listen_addr = "0.0.0.0:8444"
+ca_cert_pem = "D:\\OscPki\\certs\\intermediate-cert.pem"
+ca_key_pem = "D:\\OscPki\\certs\\intermediate-key.pem"
+server_cert_pem = "D:\\OscPki\\certs\\server.pem"
+server_key_pem = "D:\\OscPki\\certs\\server-key.pem"
+ca_bundle_pem = "D:\\OscPki\\certs\\ca-chain.pem"
+allowed_station_ids = ["SE_XANXERE", "SE_PALHOCA", "SE_JOINVILLE"]
+renewal_window_days_max = 60
+issued_cert_validity_days = 365
+audit_dir = "D:\\OscPki\\audit"
+log_dir = "D:\\OscPki\\logs"
